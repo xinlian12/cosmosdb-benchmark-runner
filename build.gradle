@@ -11,13 +11,13 @@ allprojects {
     apply plugin: 'idea'
 
     ext {
-        cosmosV4Version = project.hasProperty('cosmosV4Version') ? project.getProperty('cosmosV4Version') : '4.0.1-beta.1'
+        cosmosV4Version = project.hasProperty('cosmosV4Version') ? project.getProperty('cosmosV4Version') : '4.0.1-beta.2'
         cosmosV3Version = project.hasProperty('cosmosV3Version') ? project.getProperty('cosmosV3Version') : '3.7.4'
         cosmosV2Version = project.hasProperty('cosmosV2Version') ? project.getProperty('cosmosV2Version') : '2.6.8'
     }
 
     group = 'com.adobe.platform.core.identity.services'
-    version = "1.2-cosmos-beta.1"
+    version = "1.2-cosmos-4.0.1-beta.2"
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -89,6 +89,7 @@ project(':async-client') {
 project(':v4-client') {
     dependencies {
         compile project(':client-common')
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
         compile "com.azure:azure-cosmos:${cosmosV4Version}"
 //        compile "io.netty:netty-tcnative-boringssl-static:2.0.28.Final"
 //        compile group: 'io.netty', name: 'netty-tcnative', version: '2.0.28.Final', classifier: 'linux-x86_64'

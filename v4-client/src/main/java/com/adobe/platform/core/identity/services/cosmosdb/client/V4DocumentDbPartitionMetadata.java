@@ -6,6 +6,7 @@ import com.azure.cosmos.implementation.DocumentCollection;
 import com.azure.cosmos.implementation.PartitionKeyRange;
 import com.azure.cosmos.implementation.RequestOptions;
 import com.azure.cosmos.implementation.ResourceResponse;
+import com.azure.cosmos.implementation.apachecommons.lang.tuple.ImmutablePair;
 import com.azure.cosmos.implementation.routing.CollectionRoutingMap;
 import com.azure.cosmos.implementation.routing.IServerIdentity;
 import com.azure.cosmos.implementation.routing.InMemoryCollectionRoutingMap;
@@ -16,10 +17,10 @@ import com.azure.cosmos.models.FeedOptions;
 import com.azure.cosmos.models.FeedResponse;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -95,11 +96,12 @@ class V4DocumentDbPartitionMetadata {
     FeedResponse<PartitionKeyRange> partitionKeyRanges=
       client.readPartitionKeyRanges(collectionLink, new FeedOptions()).blockFirst();
 
-    List<ImmutablePair<PartitionKeyRange, IServerIdentity>> ranges = partitionKeyRanges
-      .getResults().stream()
-      .map(r -> new ImmutablePair<PartitionKeyRange, IServerIdentity>(r, new IServerIdentity() {}))
-            .collect(Collectors.toList());
+    List<ImmutablePair<PartitionKeyRange, IServerIdentity>> ranges = new ArrayList<>();
 
+    for(PartitionKeyRange r : partitionKeyRanges.getResults()) {
+      ranges.add(new ImmutablePair(r, new IServerIdentity() {}));
+    }
+    
     try {
       return InMemoryCollectionRoutingMap.tryCreateCompleteRoutingMap(ranges, collectionLink);
     } catch (Exception ex){

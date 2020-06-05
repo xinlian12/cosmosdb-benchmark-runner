@@ -8,9 +8,11 @@ import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosClientException;
-import com.azure.cosmos.CosmosPagedFlux;
+import com.azure.cosmos.implementation.RequestRateTooLargeException;
+import com.azure.cosmos.implementation.apachecommons.lang.tuple.Pair;
+import com.azure.cosmos.implementation.guava25.collect.ImmutableMap;
+import com.azure.cosmos.util.CosmosPagedFlux;
 import com.azure.cosmos.ItemOperationsBridge;
-import com.azure.cosmos.RequestRateTooLargeException;
 import com.azure.cosmos.implementation.HttpConstants;
 import com.azure.cosmos.implementation.query.PartitionedQueryExecutionInfo;
 import com.azure.cosmos.models.CosmosAsyncItemResponse;
@@ -24,7 +26,6 @@ import com.azure.cosmos.models.IndexingPolicy;
 import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.models.PartitionKeyDefinition;
 import com.azure.cosmos.models.SqlParameter;
-import com.azure.cosmos.models.SqlParameterList;
 import com.azure.cosmos.models.SqlQuerySpec;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -34,9 +35,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
@@ -286,7 +285,7 @@ public class V4AsyncCosmosDbClient implements CosmosDbClient {
     public Mono<CosmosDatabaseProperties> getDatabase(String dbName) {
         Mono<CosmosDatabaseProperties> dbObs = client
             .queryDatabases(new SqlQuerySpec(CosmosConstants.ROOT_QUERY,
-                    new SqlParameterList(new SqlParameter("@id", dbName))), null)
+                    new SqlParameter("@id", dbName)), null)
                 .byPage()
             .flatMap(feedResponse -> {
                 if (feedResponse.getResults().isEmpty()) {
@@ -308,7 +307,7 @@ public class V4AsyncCosmosDbClient implements CosmosDbClient {
         Mono<CosmosContainerProperties> docCollObs = client.getDatabase(dbName)
             .queryContainers(
                     new SqlQuerySpec(CosmosConstants.ROOT_QUERY,
-                            new SqlParameterList(new SqlParameter("@id", collectionName))), null)
+                            new SqlParameter("@id", collectionName)), null)
                 .byPage()
             .flatMap(feedResponse -> {
                 if (feedResponse.getResults().isEmpty()) {
@@ -439,10 +438,10 @@ public class V4AsyncCosmosDbClient implements CosmosDbClient {
         connectionPolicy.setMaxPoolSize(maxPoolSize);
 
         return new CosmosClientBuilder()
-                .setEndpoint(serviceEndpoint)
-                .setKey(masterKey)
-                .setConnectionPolicy(connectionPolicy)
-                .setConsistencyLevel(ConsistencyLevel.valueOf(consistencyLevel.toUpperCase()))
+                .endpoint(serviceEndpoint)
+                .key(masterKey)
+                .connectionPolicy(connectionPolicy)
+                .consistencyLevel(ConsistencyLevel.valueOf(consistencyLevel.toUpperCase()))
                 .buildAsyncClient();
     }
 

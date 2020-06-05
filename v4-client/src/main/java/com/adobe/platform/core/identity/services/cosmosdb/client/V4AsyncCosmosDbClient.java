@@ -2,12 +2,12 @@ package com.adobe.platform.core.identity.services.cosmosdb.client;
 
 import com.adobe.platform.core.identity.services.cosmosdb.util.CosmosDbException;
 import com.azure.cosmos.ConnectionMode;
-import com.azure.cosmos.ConnectionPolicy;
 import com.azure.cosmos.ConsistencyLevel;
 import com.azure.cosmos.CosmosAsyncClient;
 import com.azure.cosmos.CosmosAsyncContainer;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosClientException;
+import com.azure.cosmos.DirectConnectionConfig;
 import com.azure.cosmos.implementation.RequestRateTooLargeException;
 import com.azure.cosmos.implementation.apachecommons.lang.tuple.Pair;
 import com.azure.cosmos.implementation.guava25.collect.ImmutableMap;
@@ -431,20 +431,20 @@ public class V4AsyncCosmosDbClient implements CosmosDbClient {
                                                           String connectionMode, String consistencyLevel,
                                                           int maxPoolSize, int requestTimeoutInMillis){
 
-        ConnectionPolicy connectionPolicy = new ConnectionPolicy();
-        connectionPolicy.setRequestTimeout(Duration.ofMillis(requestTimeoutInMillis));
 
-        connectionPolicy.setConnectionMode(ConnectionMode.valueOf(connectionMode.toUpperCase()));
-        connectionPolicy.setMaxPoolSize(maxPoolSize);
+        if (ConnectionMode.valueOf(connectionMode.toUpperCase()) != ConnectionMode.DIRECT) {
+            throw new NotImplementedException("only support direct");
+        }
+
+        DirectConnectionConfig directConnectionConfig = DirectConnectionConfig.getDefaultConfig();
 
         return new CosmosClientBuilder()
                 .endpoint(serviceEndpoint)
                 .key(masterKey)
-                .connectionPolicy(connectionPolicy)
+                .directMode(directConnectionConfig)
                 .consistencyLevel(ConsistencyLevel.valueOf(consistencyLevel.toUpperCase()))
                 .buildAsyncClient();
     }
-
 
     private static FeedOptions generateFeedOptions(String partitionKey) {
         throw new NotImplementedException("");

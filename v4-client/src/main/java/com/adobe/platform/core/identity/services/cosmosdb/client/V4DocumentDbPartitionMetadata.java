@@ -101,7 +101,7 @@ class V4DocumentDbPartitionMetadata {
     for(PartitionKeyRange r : partitionKeyRanges.getResults()) {
       ranges.add(new ImmutablePair(r, new IServerIdentity() {}));
     }
-    
+
     try {
       return InMemoryCollectionRoutingMap.tryCreateCompleteRoutingMap(ranges, collectionLink);
     } catch (Exception ex){

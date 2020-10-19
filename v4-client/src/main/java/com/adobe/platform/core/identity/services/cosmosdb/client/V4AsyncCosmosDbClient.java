@@ -17,6 +17,7 @@ import com.azure.cosmos.implementation.guava25.collect.ImmutableMap;
 import com.azure.cosmos.implementation.query.PartitionedQueryExecutionInfo;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosDatabaseProperties;
+import com.azure.cosmos.models.CosmosItemIdentity;
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.models.FeedResponse;
@@ -45,6 +46,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -138,7 +140,11 @@ public class V4AsyncCosmosDbClient implements CosmosDbClient {
         options.setMaxBufferedItemCount(1000000);
 
 
-        FeedResponse<JsonNode> results = ItemOperationsBridge.readManyAsync(getCosmosContainerOrLoad(collectionName), docIdList.stream().map(id -> Pair.of(id, new PartitionKey(id))).collect(Collectors.toList()), options, JsonNode.class).block();
+        List<CosmosItemIdentity> itemIdentities =
+            docIdList.stream().map(id ->
+                    new CosmosItemIdentity(new PartitionKey(id), id)).collect(Collectors.toList());
+
+        FeedResponse<JsonNode> results = ItemOperationsBridge.readManyAsync(getCosmosContainerOrLoad(collectionName), itemIdentities, options, JsonNode.class).block();
         Stream<SimpleDocument> resultStream = results.getElements().stream().map(r -> objectMapper.convertValue(r, HashMap.class)).map(map -> new SimpleDocument((String) map.get("id"), map));
 
         List<SimpleDocument> docs = resultStream.collect(Collectors.<SimpleDocument>toList());

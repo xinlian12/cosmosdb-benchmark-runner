@@ -16,7 +16,6 @@ import com.azure.cosmos.implementation.routing.Range;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.models.FeedResponse;
 import com.azure.cosmos.models.PartitionKeyDefinition;
-import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

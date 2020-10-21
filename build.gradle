@@ -11,7 +11,7 @@ allprojects {
     apply plugin: 'idea'
 
     ext {
-        cosmosV4Version = project.hasProperty('cosmosV4Version') ? project.getProperty('cosmosV4Version') : '4.8.0-beta.1'
+        cosmosV4Version = project.hasProperty('cosmosV4Version') ? project.getProperty('cosmosV4Version') : '4.7.0'
         cosmosV3Version = project.hasProperty('cosmosV3Version') ? project.getProperty('cosmosV3Version') : '3.7.4'
         cosmosV2Version = project.hasProperty('cosmosV2Version') ? project.getProperty('cosmosV2Version') : '2.6.8'
     }
@@ -91,7 +91,12 @@ project(':v4-client') {
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
 
         compile project(':client-common')
-        compile "com.azure:azure-cosmos:${cosmosV4Version}"
+        compile ("com.azure:azure-cosmos:${cosmosV4Version}") {
+            // Including tcnative will break v2 async client, exclude it for now until we fix in v2
+            // https://github.com/Azure/azure-sdk-for-java/issues/16617
+            exclude group:'io.netty', module:'netty-tcnative-boringssl-static'
+        }
+
 //        compile "io.netty:netty-tcnative-boringssl-static:2.0.28.Final"
 //        compile group: 'io.netty', name: 'netty-tcnative', version: '2.0.28.Final', classifier: 'linux-x86_64'
 //        compile group: 'software.amazon.cryptools', name: 'AmazonCorrettoCryptoProvider', version: '1.3.0', classifier: 'linux-x86_64'

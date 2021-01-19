@@ -94,7 +94,7 @@ project(':v4-client') {
         compile ("com.azure:azure-cosmos:${cosmosV4Version}") {
             // Including tcnative will break v2 async client, exclude it for now until we fix in v2
             // https://github.com/Azure/azure-sdk-for-java/issues/16617
-            exclude group:'io.netty', module:'netty-tcnative-boringssl-static'
+            // exclude group:'io.netty', module:'netty-tcnative-boringssl-static'
         }
 
 //        compile "io.netty:netty-tcnative-boringssl-static:2.0.28.Final"
